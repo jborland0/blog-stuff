@@ -45,7 +45,7 @@ def moodilyze(text,emotion):
 	net = SentimentalLSTM(vocab_size, output_size, embedding_dim, hidden_dim, n_layers)
 
 	# read the state dictionary from the file
-	net.load_state_dict(torch.load('/var/www/jborland/html/moodilyzer/moodilyzer/nn/models/' + emotion + '.pt'))
+	net.load_state_dict(torch.load('/path/to/your/models/' + emotion + '.pt'))
 
 	# init hidden state
 	h = net.init_hidden(batch_size)
@@ -54,7 +54,7 @@ def moodilyze(text,emotion):
 	net.eval()
 
 	# read vocabulary from file
-	vocab_to_int = pickle.load( open( "/var/www/jborland/html/moodilyzer/moodilyzer/nn/models/vocab_to_int.p", "rb" ) )
+	vocab_to_int = pickle.load( open( "/path/to/your/vocab_to_int.p", "rb" ) )
 
 	sentences = list()
 	sentences.append(text)
