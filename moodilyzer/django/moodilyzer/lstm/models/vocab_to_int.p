@@ -1,0 +1,1 @@
+This is where the binary file goes that maps words to integers.
