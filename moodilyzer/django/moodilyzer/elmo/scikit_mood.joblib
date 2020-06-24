@@ -1,0 +1,1 @@
+After running the dataprep* files there will be a .joblib file for each mood, which contains the scikit model.
