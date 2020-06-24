@@ -11,9 +11,10 @@ import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
+from joblib import load
 
 class ElmoClassifier:
-	def __init__(self, pickle_dir):
+	def __init__(self, pickle_dir, text):
 		pd.set_option('display.max_colwidth', 200)
 		self.pickle_dir = pickle_dir
 
@@ -27,6 +28,9 @@ class ElmoClassifier:
 
 		# import spaCy's language model
 		self.nlp = spacy.load('en_core_web_sm', disable=['parser', 'ner'])
+		
+		# create elmo vectors for input text
+		self.elmo_text = self.create_elmo_vectors(text)
 
 	# function to lemmatize text
 	def lemmatization(self, texts):
@@ -46,11 +50,11 @@ class ElmoClassifier:
 			# return average of ELMo features
 			return sess.run(tf.reduce_mean(embeddings,1))
 
-	def create_elmo_vectors(self, mood, text):
+	def create_elmo_vectors(self, text):
 		# create fake tweet file
-		data = [[0, text]]
-
-		# Create the pandas DataFrame
+		data = [[0, text]] 
+	  
+		# Create the pandas DataFrame 
 		train = pd.DataFrame(data, columns = ['id', 'tweet'])
 
 		# remove URL's from train
@@ -82,52 +86,30 @@ class ElmoClassifier:
 
 		# concatenate back into single arrays
 		elmo_train_new = np.concatenate(elmo_train, axis = 0)
-
+		
 		# return result
 		return elmo_train_new
 
+	def classify_mood(self, mood):
 
-	def classify_mood(self, text, mood):
-
-		# read data
-		train = pd.read_csv(os.path.join(self.pickle_dir, 'train_' + mood + '.csv'))
-		print(train.shape)
-
-		# load elmo_train_new
-		pickle_in = open(os.path.join(self.pickle_dir, 'elmo_train_' + mood + '.pickle'), 'rb')
-		elmo_train_new = pickle.load(pickle_in)
-
-		# split into training and validation
-		xtrain, xvalid, ytrain, yvalid = train_test_split(elmo_train_new, 
-														  train['label'],  
-														  random_state=42, 
-														  test_size=0.2)
-
-		# create and train classification model
-		lreg = LogisticRegression()
-		lreg.fit(xtrain, ytrain)
-
-		# create elmo vectors for input text
-		elmo_text = self.create_elmo_vectors(mood, text)
+		# load classification model
+		lreg = load(os.path.join(self.pickle_dir, 'scikit_' + mood + '.joblib'))
 
 		# classify!
-		classification = lreg.predict(elmo_text)
-
-		# downcast for JSON
+		classification = lreg.predict(self.elmo_text)
 		return int(classification[0]) * 100
 
-	def classify(self, text):
-		print('grateful: ' + str(self.classify_mood(text,'grateful')))
-		print('happy: ' + str(self.classify_mood(text,'happy')))
-		print('hopeful: ' + str(self.classify_mood(text,'hopeful')))
-		print('determined: ' + str(self.classify_mood(text,'determined')))
-		print('aware: ' + str(self.classify_mood(text,'aware')))
-		print('stable: ' + str(self.classify_mood(text,'stable')))
-		print('frustrated: ' + str(self.classify_mood(text,'frustrated')))
-		print('overwhelmed: ' + str(self.classify_mood(text,'overwhelmed')))
-		print('angry: ' + str(self.classify_mood(text,'angry')))
-		print('guilty: ' + str(self.classify_mood(text,'guilty')))
-		print('lonely: ' + str(self.classify_mood(text,'lonely')))
-		print('scared: ' + str(self.classify_mood(text,'scared')))
-		print('sad: ' + str(self.classify_mood(text,'sad')))
-
+	def classify(self):
+		print('grateful: ' + str(self.classify_mood('grateful')))
+		print('happy: ' + str(self.classify_mood('happy')))
+		print('hopeful: ' + str(self.classify_mood('hopeful')))
+		print('determined: ' + str(self.classify_mood('determined')))
+		print('aware: ' + str(self.classify_mood('aware')))
+		print('stable: ' + str(self.classify_mood('stable')))
+		print('frustrated: ' + str(self.classify_mood('frustrated')))
+		print('overwhelmed: ' + str(self.classify_mood('overwhelmed')))
+		print('angry: ' + str(self.classify_mood('angry')))
+		print('guilty: ' + str(self.classify_mood('guilty')))
+		print('lonely: ' + str(self.classify_mood('lonely')))
+		print('scared: ' + str(self.classify_mood('scared')))
+		print('sad: ' + str(self.classify_mood('sad')))
